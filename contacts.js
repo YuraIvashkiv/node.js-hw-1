@@ -5,48 +5,72 @@ const crypto = require("node:crypto");
 const contactsPath = path.join(__dirname, "./db/contacts.json");
 
 async function readContacts() {
-  const data = await fs.readFile(contactsPath, { encoding: "utf-8" });
-  return JSON.parse(data);
+  try {
+    const data = await fs.readFile(contactsPath, { encoding: "utf-8" });
+    return JSON.parse(data);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function writeContacts(contacts) {
-  return fs.writeFile(contactsPath, JSON.stringify(contacts, undefined, 2));
+  try {
+    return fs.writeFile(contactsPath, JSON.stringify(contacts, undefined, 2));
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 async function listContacts() {
-  const contacts = await readContacts();
-  return contacts;
+  try {
+    const contacts = await readContacts();
+    return contacts;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 async function getContactById(contactId) {
-  const contacts = await readContacts();
-  const contact = contacts.find((contact) => contact.id === contactId);
-  if (!contact) {
-    return null;
+  try {
+    const contacts = await readContacts();
+    const contact = contacts.find((contact) => contact.id === contactId);
+    if (!contact) {
+      return null;
+    }
+    return contact;
+  } catch (error) {
+    console.error(error);
   }
-  return contact;
 }
 
 async function removeContact(contactId) {
-  const contacts = await readContacts();
-  const index = contacts.findIndex((contact) => contact.id === contactId);
-  if (index === -1) {
-    return null;
+  try {
+    const contacts = await readContacts();
+    const index = contacts.findIndex((contact) => contact.id === contactId);
+    if (index === -1) {
+      return null;
+    }
+    const newContacts = [
+      ...contacts.slice(0, index),
+      ...contacts.slice(index + 1),
+    ];
+    await writeContacts(newContacts);
+    return contacts[index];
+  } catch (error) {
+    console.error(error);
   }
-  const newContacts = [
-    ...contacts.slice(0, index),
-    ...contacts.slice(index + 1),
-  ];
-  await writeContacts(newContacts);
-  return contacts[index];
 }
 
 async function addContact(name, email, phone) {
-  const contacts = await readContacts();
-  const newBook = { name, email, phone, id: crypto.randomUUID() };
-  contacts.push(newBook);
-  await writeContacts(contacts);
-  return newBook;
+  try {
+    const contacts = await readContacts();
+    const newBook = { name, email, phone, id: crypto.randomUUID() };
+    contacts.push(newBook);
+    await writeContacts(contacts);
+    return newBook;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 module.exports = {
